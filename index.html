@@ -319,9 +319,12 @@ body{position:relative;}
   background:#fff;border:1px solid var(--ink-08);border-radius:10px;
   padding:26px 26px 24px;
   display:flex;flex-direction:column;gap:10px;
-  transition:box-shadow .25s var(--ease-out),transform .25s var(--ease-out);
+  position:relative;top:0;
+  /* one combined transition: reveal props slow, hover props snappy */
+  transition:opacity .7s var(--ease-out),transform .7s var(--ease-out),
+    box-shadow .25s var(--ease-out),top .25s var(--ease-out);
 }
-.bcard:hover{box-shadow:var(--shadow-card);transform:translateY(-2px);}
+.bcard:hover{box-shadow:var(--shadow-card);top:-2px;}
 .bcard.wide{grid-column:span 2;}
 .bshape{display:flex;margin-bottom:10px;}
 .bshape i{width:16px;height:16px;display:block;}
@@ -1138,7 +1141,13 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   /* ---- Scroll reveals ---- */
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}
+      if(e.isIntersecting){
+        var el = e.target;
+        el.classList.add("in");
+        io.unobserve(el);
+        /* drop the stagger delay once revealed so hover responds instantly */
+        setTimeout(function(){ el.style.transitionDelay = ""; }, 1000);
+      }
     });
   },{threshold:.12,rootMargin:"0px 0px -40px 0px"});
   document.querySelectorAll(".rv").forEach(function(el,i){
