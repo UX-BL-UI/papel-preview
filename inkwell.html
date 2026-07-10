@@ -1030,8 +1030,12 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   setTimeout(morphBeat, 900);
 
   buildTiles();
-  var rT;
-  window.addEventListener("resize",function(){clearTimeout(rT);rT=setTimeout(buildTiles,220);});
+  var rT, lastBuildW = window.innerWidth;
+  window.addEventListener("resize",function(){
+    if(Math.abs(window.innerWidth - lastBuildW) < 2) return; /* iOS URL bar changes height only */
+    lastBuildW = window.innerWidth;
+    clearTimeout(rT);rT=setTimeout(buildTiles,220);
+  });
 
   /* ---- Scroll reveals ---- */
   var io = new IntersectionObserver(function(entries){

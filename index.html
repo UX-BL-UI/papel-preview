@@ -516,6 +516,16 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   padding:11px 16px;border:1px solid var(--ink-12);border-radius:999px;background:#fff;color:var(--ink);}
 .wl-form input:focus{outline:2px solid var(--blueprint);outline-offset:1px;}
 .wl-done{font-size:15px;font-weight:500;color:var(--fieldwork);}
+
+/* ---------- Small screens: compact nav, headline fits ---------- */
+@media (max-width:680px){
+  .nav{height:72px;gap:14px;}
+  .nav-logo svg{width:112px;height:30px;}
+  .nav .btn{padding:10px 14px;font-size:13px;}
+  .nav-shell.shrunk .nav{height:60px;}
+  .nav-shell.shrunk .nav-logo svg{width:92px;height:25px;}
+  .hero-copy h1{font-size:clamp(28px,8.6vw,36px);}
+}
 </style>
 </head>
 <body>
@@ -1112,8 +1122,12 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   }, 340);
 
   buildTiles();
-  var rT;
-  window.addEventListener("resize",function(){clearTimeout(rT);rT=setTimeout(buildTiles,220);});
+  var rT, lastBuildW = window.innerWidth;
+  window.addEventListener("resize",function(){
+    if(Math.abs(window.innerWidth - lastBuildW) < 2) return; /* iOS URL bar changes height only */
+    lastBuildW = window.innerWidth;
+    clearTimeout(rT);rT=setTimeout(buildTiles,220);
+  });
 
   /* ---- Nav shrinks once you scroll ---- */
   var navShell = document.querySelector(".nav-shell");
