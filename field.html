@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Papel. Transaction coordination, handled.</title>
+<meta name="description" content="Papel is a transaction coordinator for Minnesota real estate agents. Email the deal terms. The paperwork is back in your inbox in minutes, ready for your review. Nothing reaches your client until you approve it." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* Sofia Pro has no web license; Albert Sans is the documented web substitute */
+
+/* ============ Tokens ============ */
+:root{
+  --blueprint:#1F80FF;
+  --blueprint-deep:#1668D1;
+  --clearsky:#3A97F0;
+  --shoreline:#33B599;
+  --fieldwork:#34A753;
+  --goldrun:#F9BB07;
+  --redline:#E94436;
+  --paper:#FAFAFA;
+  --ink:#141414;
+  --ink-70:rgba(20,20,20,.70);
+  --ink-55:rgba(20,20,20,.55);
+  --ink-38:rgba(20,20,20,.38);
+  --ink-12:rgba(20,20,20,.12);
+  --ink-08:rgba(20,20,20,.08);
+  --paper-70:rgba(250,250,250,.72);
+  --paper-45:rgba(250,250,250,.45);
+  --paper-14:rgba(250,250,250,.14);
+  --shadow-card:0 6px 24px rgba(20,20,20,.08), 0 24px 64px rgba(20,20,20,.10);
+  --ease:cubic-bezier(.76,0,.24,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --margin:clamp(20px,5vw,72px);
+  --content:1180px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Albert Sans",system-ui,-apple-system,sans-serif;
+  font-weight:400;
+  font-size:16px;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none;}
+::selection{background:var(--blueprint);color:var(--paper);}
+a:focus-visible,button:focus-visible{outline:2px solid var(--blueprint);outline-offset:3px;}
+.on-dark a:focus-visible,.on-dark button:focus-visible{outline-color:var(--paper);}
+
+.wrap{max-width:var(--content);margin:0 auto;padding-inline:var(--margin);}
+
+/* ============ Utility type ============ */
+.eyebrow{
+  display:inline-block;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--blueprint);
+  margin-bottom:20px;
+}
+.on-dark .eyebrow{color:var(--clearsky);}
+.h-display{
+  font-weight:200;
+  letter-spacing:-.02em;
+  line-height:1.04;
+  font-size:clamp(34px,4.4vw,56px);
+  text-wrap:balance;
+}
+.body-lg{
+  font-size:clamp(17px,1.5vw,20px);
+  line-height:1.55;
+  color:var(--ink-70);
+  font-weight:400;
+}
+.on-dark .body-lg{color:var(--paper-70);}
+.tnum{font-variant-numeric:tabular-nums;}
+
+/* ============ Buttons ============ */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:inherit;font-size:15px;font-weight:500;
+  border-radius:999px;border:0;cursor:pointer;
+  padding:15px 26px;line-height:1;white-space:nowrap;
+  transition:background .18s var(--ease-out),color .18s var(--ease-out),transform .18s var(--ease-out);
+}
+.btn .chev{font-weight:600;transition:transform .18s var(--ease-out);display:inline-block;}
+.btn:hover .chev{transform:translateX(3px);}
+.btn-primary{background:var(--blueprint);color:#fff;}
+.btn-primary:hover{background:var(--blueprint-deep);}
+.btn-ink{background:var(--ink);color:var(--paper);}
+.btn-ink:hover{background:#000;}
+.btn-paper{background:var(--paper);color:var(--ink);}
+.btn-paper:hover{background:#fff;}
+.link-arrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:15px;font-weight:500;color:var(--blueprint);
+}
+.link-arrow .chev{transition:transform .18s var(--ease-out);font-weight:600;}
+.link-arrow:hover .chev{transform:translateX(3px);}
+
+/* ============ Nav ============ */
+.nav-shell{
+  position:fixed;inset-inline:0;top:0;z-index:60;
+  background:rgba(250,250,250,.88);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--ink-08);
+}
+.nav{
+  max-width:var(--content);margin:0 auto;
+  padding-inline:var(--margin);
+  height:64px;
+  display:flex;align-items:center;gap:30px;
+}
+.nav-logo{display:flex;align-items:center;gap:9px;margin-right:10px;}
+.nav-logo svg{display:block;}
+.nav-links{display:flex;gap:30px;flex:1;}
+.nav-links a{
+  font-size:14.5px;font-weight:500;color:var(--ink-70);
+  transition:color .15s ease;
+}
+.nav-links a:hover{color:var(--ink);}
+.nav-cta{margin-left:auto;}
+.nav .btn{padding:12px 20px;font-size:14px;}
+
+/* ============ Layout rails ============ */
+body{position:relative;}
+.rails{position:absolute;inset:0;pointer-events:none;z-index:55;}
+.rails{clip-path:polygon(0 74px,100% 570px,100% 100%,0 100%);}
+.rails i{
+  position:absolute;top:0;bottom:0;width:1px;
+  background:rgba(136,136,136,.22);
+}
+.rails i:first-child{left:calc(50% - var(--content)/2);}
+.rails i:last-child{right:calc(50% - var(--content)/2);}
+@media (max-width:1220px){.rails{display:none;}}
+
+/* ============ Hero ============ */
+.hero{position:relative;padding-top:0;}
+.hero-canvas{
+  position:absolute;inset-inline:0;top:0;height:min(72vw,620px);
+  clip-path:polygon(0 0,100% 0,100% 92%,0 12%);
+  overflow:hidden;
+  background:var(--paper);
+}
+.tiles{
+  position:absolute;inset:-2px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(58px,1fr));
+  grid-auto-rows:1fr;
+}
+.tile{
+  width:calc(100% + 1px);height:calc(100% + 1px);margin:-0.5px;
+  transform:scale(0);
+  transition:background-color .45s ease,border-radius .45s ease,transform .26s var(--ease-out);
+}
+.tile.sq{border-radius:0;}
+.tile.qt-tl{border-radius:100% 0 0 0;}
+.tile.qt-tr{border-radius:0 100% 0 0;}
+.tile.qt-br{border-radius:0 0 100% 0;}
+.tile.qt-bl{border-radius:0 0 0 100%;}
+.tile.dp-r{border-radius:0 999px 999px 0;}
+.tile.dp-l{border-radius:999px 0 0 999px;}
+.tile.dp-t{border-radius:999px 999px 0 0;}
+.tile.dp-b{border-radius:0 0 999px 999px;}
+.tile.ci{border-radius:50%;}
+.tiles.on .tile{
+  animation:tile-in .5s var(--ease-out) forwards;
+  animation-delay:var(--d);
+}
+.tile:not(.blank){z-index:1;cursor:pointer;}
+.tiles.settled .tile{animation:none;transform:none;}
+.tiles.settled .tile:not(.blank):hover{transform:scale(1.08);z-index:3;}
+@keyframes tile-in{to{transform:scale(1);}}
+
+.hero-inner{
+  position:relative;z-index:2;
+  pointer-events:none;
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+  gap:48px;
+  padding-top:clamp(210px,25vw,360px);
+  padding-bottom:clamp(72px,8vw,120px);
+  align-items:start;
+}
+.hero-inner h1,.hero-inner p,.hero-inner a,.hero-inner .card{pointer-events:auto;}
+.hero-copy h1{
+  font-weight:200;
+  letter-spacing:-.025em;
+  line-height:1.04;
+  font-size:clamp(38px,4.3vw,62px);
+  margin-bottom:26px;
+  margin-right:-48px;
+  white-space:nowrap;
+}
+.hero-copy .body-lg{max-width:31em;margin-bottom:34px;}
+.hero-ctas{display:flex;gap:28px;flex-wrap:wrap;align-items:center;}
+
+/* headline line reveal */
+.line-mask{display:block;overflow:hidden;}
+.line-mask > span{display:block;transform:translateY(112%);}
+.reveal-on .line-mask > span{
+  animation:line-up .8s var(--ease) forwards;
+  animation-delay:var(--d,0s);
+}
+@keyframes line-up{to{transform:translateY(0);}}
+
+/* hero cards */
+.hero-cards{position:relative;min-height:520px;}
+.card{
+  background:#fff;
+  border:1px solid var(--ink-08);
+  border-radius:10px;
+  box-shadow:var(--shadow-card);
+}
+.card-mail{
+  position:absolute;top:-96px;right:34px;left:0;
+  max-width:440px;margin-left:auto;
+  padding:22px 24px 20px;
+}
+.card-docs{
+  position:absolute;top:206px;right:-8px;left:64px;
+  max-width:430px;margin-left:auto;
+  padding:20px 24px 18px;
+}
+.card-kicker{
+  font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-38);margin-bottom:14px;
+}
+.mail-row{font-size:13.5px;color:var(--ink-55);display:flex;gap:8px;padding:3px 0;}
+.mail-row b{color:var(--ink);font-weight:500;}
+.mail-body{
+  font-size:14.5px;line-height:1.55;color:var(--ink-70);
+  border-top:1px solid var(--ink-08);margin-top:12px;padding-top:14px;
+}
+.mail-reply{
+  margin-top:14px;background:var(--paper);
+  border-left:2px solid var(--blueprint);
+  padding:10px 14px;font-size:14px;line-height:1.5;color:var(--ink);
+}
+.mail-reply .from{font-size:12px;color:var(--ink-38);display:block;margin-bottom:3px;}
+.doc-row{
+  display:flex;align-items:baseline;gap:12px;
+  padding:11px 0;border-bottom:1px solid var(--ink-08);
+  font-size:14.5px;
+}
+.doc-row:last-of-type{border-bottom:0;}
+.doc-name{font-weight:500;flex:1;min-width:0;}
+.doc-status{font-size:13px;color:var(--ink-55);white-space:nowrap;}
+.doc-status .ok{color:var(--fieldwork);font-weight:500;}
+.doc-status .pend{color:var(--goldrun);font-weight:500;}
+.doc-foot{
+  margin-top:6px;padding-top:14px;border-top:1px solid var(--ink-08);
+  font-size:13px;color:var(--ink-55);
+  display:flex;align-items:center;gap:9px;
+}
+.doc-foot .chip{width:12px;height:12px;background:var(--blueprint);border-radius:100% 0 0 0;flex:none;}
+
+/* ============ Ticker ============ */
+.ticker{border-top:1px solid var(--ink-12);border-bottom:1px solid var(--ink-12);}
+.ticker .wrap{
+  display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+  padding-block:16px;
+}
+.ticker-label{
+  font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-38);flex:none;
+}
+.ticker-steps{display:flex;gap:26px;flex-wrap:wrap;font-size:14px;color:var(--ink-70);}
+.ticker-steps span b{font-weight:500;color:var(--ink);}
+.ticker-total{margin-left:auto;font-size:14px;font-weight:500;color:var(--blueprint);white-space:nowrap;}
+
+/* ============ Sections ============ */
+.section{padding-block:clamp(84px,10vw,140px);}
+.sec-head{max-width:760px;margin-bottom:clamp(44px,6vw,72px);}
+.sec-head .body-lg{margin-top:20px;max-width:38em;}
+
+/* scroll reveal */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);}
+.rv.in{opacity:1;transform:none;}
+
+/* ============ Timeline (how it works) ============ */
+.timeline{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(20px,3vw,40px);
+}
+.step{position:relative;padding-top:26px;}
+.step::before{
+  content:"";position:absolute;top:0;left:0;right:calc(-1 * clamp(20px,3vw,40px));
+  height:2px;background:var(--ink-12);
+}
+.step:last-child::before{right:0;}
+.step::after{
+  content:"";position:absolute;top:-5px;left:0;
+  width:12px;height:12px;background:var(--blueprint);
+}
+.step:nth-child(2)::after{border-radius:100% 0 0 0;background:var(--shoreline);}
+.step:nth-child(3)::after{border-radius:0 999px 999px 0;background:var(--goldrun);}
+.step:nth-child(4)::after{border-radius:0 0 100% 0;background:var(--fieldwork);}
+.step time{
+  display:block;font-size:13px;font-weight:500;color:var(--ink-38);
+  letter-spacing:.04em;margin-bottom:10px;font-variant-numeric:tabular-nums;
+}
+.step h3{font-size:19px;font-weight:500;margin-bottom:8px;letter-spacing:-.01em;}
+.step p{font-size:15px;line-height:1.55;color:var(--ink-70);}
+
+/* ============ Bento ============ */
+.bento{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+.bcard{
+  background:#fff;border:1px solid var(--ink-08);border-radius:10px;
+  padding:26px 26px 24px;
+  display:flex;flex-direction:column;gap:10px;
+  transition:box-shadow .25s var(--ease-out),transform .25s var(--ease-out);
+}
+.bcard:hover{box-shadow:var(--shadow-card);transform:translateY(-2px);}
+.bcard.wide{grid-column:span 2;}
+.bshape{display:flex;margin-bottom:10px;}
+.bshape i{width:16px;height:16px;display:block;}
+.bcard h3{font-size:18px;font-weight:500;letter-spacing:-.01em;}
+.bcard p{font-size:14.5px;line-height:1.55;color:var(--ink-70);}
+
+/* ============ Dark review section ============ */
+.dark{background:var(--ink);color:var(--paper);}
+.review-grid{
+  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+  gap:clamp(40px,6vw,90px);align-items:center;
+}
+.review-grid .sec-head{margin-bottom:0;}
+.receipts{display:flex;flex-direction:column;}
+.receipt{
+  display:flex;align-items:center;gap:16px;
+  padding:18px 0;border-bottom:1px solid var(--paper-14);
+  font-size:15px;
+}
+.receipt:first-child{border-top:1px solid var(--paper-14);}
+.receipt .r-stat{
+  font-weight:200;font-size:clamp(26px,2.6vw,34px);letter-spacing:-.02em;
+  min-width:3.4em;font-variant-numeric:tabular-nums;line-height:1;
+}
+.receipt .r-note{color:var(--paper-70);line-height:1.5;}
+.review-quote{
+  margin-top:34px;font-weight:200;font-size:clamp(22px,2.2vw,28px);
+  letter-spacing:-.015em;line-height:1.25;
+}
+.review-quote em{font-style:normal;color:var(--clearsky);}
+
+/* ============ Minnesota strip ============ */
+.mn-grid{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(40px,6vw,90px);align-items:center;
+}
+.mn-grid .sec-head{margin-bottom:0;}
+.form-chips{display:flex;flex-wrap:wrap;gap:10px;padding-top:6px;}
+.form-chip{
+  font-size:13.5px;font-weight:500;letter-spacing:.02em;
+  border:1px solid var(--ink-12);
+  padding:9px 14px;background:#fff;
+  display:inline-flex;align-items:center;gap:9px;
+}
+.form-chip i{width:9px;height:9px;flex:none;display:block;}
+
+/* ============ Pricing ============ */
+.pricing{border-top:1px solid var(--ink-12);}
+.price-grid{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:clamp(40px,6vw,90px);align-items:center;
+}
+.price-grid .sec-head{margin-bottom:0;}
+.price-num{
+  font-weight:200;letter-spacing:-.03em;line-height:1;
+  font-size:clamp(64px,8vw,110px);
+  margin-bottom:16px;
+}
+.price-num small{font-size:.32em;font-weight:400;letter-spacing:0;color:var(--ink-55);vertical-align:baseline;margin-left:6px;}
+.include{list-style:none;padding-top:8px;}
+.include li{
+  display:flex;gap:14px;align-items:baseline;
+  padding:14px 0;border-bottom:1px solid var(--ink-08);
+  font-size:15.5px;
+}
+.include li:first-child{border-top:1px solid var(--ink-08);}
+.include .tick{color:var(--fieldwork);font-weight:600;flex:none;}
+.include li span:last-child{color:var(--ink-70);}
+.include li b{font-weight:500;color:var(--ink);}
+.price-note{margin-top:22px;font-size:13.5px;color:var(--ink-55);line-height:1.5;max-width:34em;}
+
+/* ============ Final CTA ============ */
+.final{background:var(--ink);color:var(--paper);position:relative;overflow:hidden;}
+.final .wrap{position:relative;z-index:2;text-align:center;padding-block:clamp(96px,12vw,160px);}
+.final h2{
+  font-weight:200;letter-spacing:-.025em;line-height:1.03;
+  font-size:clamp(44px,6vw,84px);
+  margin-bottom:22px;
+  text-wrap:balance;
+}
+.final .body-lg{max-width:32em;margin:0 auto 38px;}
+.final-frag{position:absolute;display:flex;z-index:1;}
+.final-frag i{width:clamp(28px,4vw,52px);height:clamp(28px,4vw,52px);display:block;}
+.frag-tl{top:0;left:0;}
+.frag-br{bottom:0;right:0;}
+
+/* ============ Footer ============ */
+footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
+.foot-grid{
+  display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));
+  gap:clamp(28px,4vw,56px);margin-bottom:48px;
+}
+.foot-brand p{margin-top:22px;font-size:14px;color:var(--ink-55);line-height:1.55;max-width:24em;}
+.foot-col h4{
+  font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-38);margin-bottom:16px;
+}
+.foot-col a{
+  display:block;font-size:14.5px;color:var(--ink-70);
+  padding:5px 0;transition:color .15s ease;
+}
+.foot-col a:hover{color:var(--blueprint);}
+.foot-base{
+  border-top:1px solid var(--ink-08);padding-top:24px;
+  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  font-size:13px;color:var(--ink-38);
+}
+
+/* ============ Responsive ============ */
+@media (max-width:1020px){
+  .hero-inner{grid-template-columns:1fr;padding-top:clamp(190px,30vw,260px);}
+  .hero-copy h1{margin-right:0;white-space:normal;}
+  .hero-cards{min-height:0;margin-top:26px;}
+  .card-mail{position:relative;top:0;right:0;left:0;margin-left:0;max-width:560px;}
+  .card-docs{position:relative;top:0;right:0;left:0;margin:18px 0 0 auto;max-width:520px;}
+  .timeline{grid-template-columns:repeat(2,1fr);row-gap:44px;}
+  .step:nth-child(2)::before{right:0;}
+  .bento{grid-template-columns:repeat(2,1fr);}
+  .bcard.wide{grid-column:span 2;}
+  .review-grid,.mn-grid,.price-grid{grid-template-columns:1fr;}
+  .foot-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:680px){
+  .nav-links{display:none;}
+  .hero-canvas{height:min(100vw,400px);clip-path:polygon(0 0,100% 0,100% 84%,0 54%);}
+  .hero-inner{padding-top:clamp(300px,92vw,370px);}
+  .timeline{grid-template-columns:1fr;}
+  .step::before{right:0;}
+  .bento{grid-template-columns:1fr;}
+  .bcard.wide{grid-column:auto;}
+  .ticker-total{margin-left:0;}
+  .foot-grid{grid-template-columns:1fr;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .tile{transform:none;transition:none;}
+  .tiles.on .tile{animation:none;}
+  .line-mask > span{transform:none;}
+  .reveal-on .line-mask > span{animation:none;}
+  .rv{opacity:1;transform:none;transition:none;}
+  html{scroll-behavior:auto;}
+}
+
+/* ---------- Waitlist modal (fake door) ---------- */
+.wl-overlay{position:fixed;inset:0;z-index:80;background:rgba(20,20,20,.55);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;transition:opacity .25s ease;}
+.wl-overlay[hidden]{display:none;}
+.wl-overlay.on{opacity:1;}
+.wl-modal{background:#fff;border-radius:10px;box-shadow:var(--shadow-card);
+  max-width:440px;width:100%;padding:30px 30px 28px;position:relative;color:var(--ink);
+  transform:translateY(14px);transition:transform .3s var(--ease-out);}
+.wl-overlay.on .wl-modal{transform:none;}
+.wl-close{position:absolute;top:14px;right:16px;border:0;background:none;
+  font-size:22px;color:var(--ink-38);cursor:pointer;line-height:1;padding:4px;font-family:inherit;}
+.wl-close:hover{color:var(--ink);}
+.wl-chips{display:flex;margin-bottom:18px;}
+.wl-chips i{width:14px;height:14px;display:block;}
+.wl-chips i:nth-child(1){background:var(--blueprint);}
+.wl-chips i:nth-child(2){background:var(--shoreline);border-radius:0 100% 0 0;}
+.wl-chips i:nth-child(3){background:var(--goldrun);border-radius:0 999px 999px 0;}
+.wl-modal h3{font-size:22px;font-weight:500;letter-spacing:-.01em;margin-bottom:8px;}
+.wl-modal .wl-sub{font-size:15px;line-height:1.55;color:var(--ink-70);margin-bottom:20px;}
+.wl-form{display:flex;gap:10px;}
+.wl-form[hidden]{display:none;}
+.wl-form input{flex:1;min-width:0;font-family:inherit;font-size:15px;
+  padding:11px 16px;border:1px solid var(--ink-12);border-radius:999px;background:#fff;color:var(--ink);}
+.wl-form input:focus{outline:2px solid var(--blueprint);outline-offset:1px;}
+.wl-done{font-size:15px;font-weight:500;color:var(--fieldwork);}
+</style>
+</head>
+<body>
+
+<div class="rails" aria-hidden="true"><i></i><i></i></div>
+
+<!-- ============ Nav ============ -->
+<div class="nav-shell">
+  <nav class="nav" aria-label="Main">
+    <a class="nav-logo" href="#" aria-label="Papel home">
+      <svg width="96" height="26" viewBox="0 0 502 136" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M167.688 16.9473H129.065V105.087H145.938V78.4122H167.688C188.719 78.4122 197.674 63.2267 197.674 47.6396C197.674 32.0524 188.719 16.9473 167.688 16.9473ZM166.808 63.066H145.938V32.0524H167.288C176.964 32.0524 180.802 40.1673 180.802 47.6396C180.802 55.1118 176.804 63.066 166.808 63.066Z" fill="black"/>
+        <path d="M250.929 40.0649V49.1441C246.691 42.3146 238.055 38.458 229.259 38.458C210.947 38.458 197.673 52.9203 197.673 72.5248C197.673 88.5941 206.469 100.807 218.863 105.065C221.982 106.19 225.26 106.752 228.779 106.752C232.057 106.752 235.256 106.19 238.215 105.065C243.572 103.137 248.21 99.5212 250.929 94.8611V105.065H267.002V40.0649H250.929ZM232.137 91.7276C221.582 91.7276 213.746 82.9699 213.746 72.5248C213.746 62.0798 221.582 53.4828 231.977 53.4828C241.573 53.4828 250.689 61.3567 250.689 72.5248C250.689 83.693 242.133 91.7276 232.137 91.7276Z" fill="black"/>
+        <path d="M312.266 38.458C304.509 38.458 295.233 41.7522 290.755 48.7423V40.0649H274.763V131.338H290.755V96.468C293.474 100.646 297.712 103.458 302.51 105.065C305.709 106.19 309.067 106.752 312.346 106.752C315.864 106.752 319.303 106.19 322.501 105.065C334.816 100.887 344.091 89.0762 344.091 72.6052C344.091 51.7955 329.298 38.458 312.266 38.458ZM309.787 91.7276C300.431 91.7276 290.995 84.1751 290.995 72.6052C290.995 61.0353 299.951 53.4828 309.787 53.4828C319.622 53.4828 328.019 61.9191 328.019 72.6052C328.019 83.2912 319.702 91.7276 309.787 91.7276Z" fill="black"/>
+        <path d="M414.94 71.9624C414.94 51.6348 400.386 38.458 381.994 38.458C363.603 38.458 348.01 51.7955 348.01 72.5248C348.01 88.6744 357.366 100.887 370.959 105.065C374.398 106.19 378.156 106.752 381.994 106.752C385.833 106.752 389.591 106.19 393.109 105.065C400.546 102.896 407.103 98.3964 411.181 91.9686L400.386 83.7733C396.628 89.0762 389.831 92.1293 382.954 92.1293C373.278 92.1293 366.322 87.2282 364.482 78.2294H414.62C414.78 75.819 414.94 73.73 414.94 71.9624ZM364.482 66.9006C366.481 57.0984 373.518 52.7597 382.074 52.7597C391.11 52.7597 397.987 58.0625 399.027 66.9006H364.482Z" fill="black"/>
+        <path d="M447.398 90.0624C438.762 90.0624 436.283 83.233 436.443 75.4394V16.9473H420.369V75.7608C420.369 93.8387 428.446 105.087 446.438 105.087H452.116V90.0624H447.398Z" fill="black"/>
+        <path d="M34.4657 30.0498V75.1241H22.3907C9.99586 75.1241 0 65.0005 0 52.5468C0 40.0931 9.99586 30.0498 22.3907 30.0498H34.4657Z" fill="#3A97F0"/>
+        <path d="M0.797852 75.1299L34.4639 105.179V135.229L0.877818 105.26L0.797852 105.179V75.1299Z" fill="#33B599"/>
+        <path d="M98.034 52.5465C98.034 81.5515 74.6046 105.173 45.7376 105.173H34.4627V75.1238H45.7376C58.132 75.1238 68.1275 65.0002 68.1275 52.5465C68.1275 40.0928 58.132 30.0495 45.7376 30.0495H34.4627L0.797852 0H45.7376C74.6046 0 98.034 23.5415 98.034 52.5465Z" fill="#1F80FF"/>
+        <path d="M467.774 88.8171V85.9033H480.5V88.8171H475.779V102.855H472.454V88.8171H467.774ZM501.916 102.857H498.426L497.195 92.1836L492.967 100.968H490.381L486.112 92.2252L484.839 102.857H481.391L483.526 85.9033H486.317L491.695 97.1925L496.95 85.9033H499.824L501.918 102.857H501.916Z" fill="black"/>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#back">Paperwork</a>
+      <a href="#review">Review</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-primary js-waitlist" href="#">Set up your brokerage <span class="chev">&rsaquo;</span></a>
+    </div>
+  </nav>
+</div>
+
+<!-- ============ Hero ============ -->
+<header class="hero">
+  <div class="hero-canvas" aria-hidden="true">
+    <div class="tiles" id="tiles"></div>
+  </div>
+  <div class="wrap hero-inner">
+    <div class="hero-copy reveal-on" id="heroCopy">
+      <h1>
+        <span class="line-mask"><span style="--d:.05s">Paperwork at the</span></span>
+        <span class="line-mask"><span style="--d:.15s">speed of the deal.</span></span>
+      </h1>
+      <p class="body-lg">Papel is an instant transaction coordinator for real estate agents. Email the deal terms. Purchase agreements, disclosures, and addenda are back in your inbox in minutes, ready for review. Nothing reaches your client until you approve it.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-ink js-waitlist" href="#">Set up your brokerage <span class="chev">&rsaquo;</span></a>
+        <a class="link-arrow" href="#how">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-cards">
+      <div class="card card-mail rv">
+        <div class="card-kicker">New deal &middot; 2:29pm</div>
+        <div class="mail-row"><b>To:</b><span>deals@papel.tc</span></div>
+        <div class="mail-row"><b>Subject:</b><span>Under contract, 4521 Dupont Ave S</span></div>
+        <div class="mail-body">Accepted this morning. $485,000, closing August 21. Inspection contingency 10 days, FHA financing. Buyers are the Hendersons.</div>
+        <div class="mail-reply">
+          <span class="from">Papel &middot; 2:30pm</span>
+          On it. Purchase agreement, addenda, and disclosures in your inbox by 2:32pm.
+        </div>
+      </div>
+      <div class="card card-docs rv">
+        <div class="card-kicker">4521 Dupont Ave S &middot; Documents</div>
+        <div class="doc-row"><span class="doc-name">Purchase agreement (PA-1)</span><span class="doc-status tnum"><span class="ok">Prepared</span> &middot; 2:31pm</span></div>
+        <div class="doc-row"><span class="doc-name">FHA financing addendum</span><span class="doc-status tnum"><span class="ok">Prepared</span> &middot; 2:31pm</span></div>
+        <div class="doc-row"><span class="doc-name">Inspection contingency</span><span class="doc-status tnum"><span class="ok">Prepared</span> &middot; 2:31pm</span></div>
+        <div class="doc-row"><span class="doc-name">Seller's disclosure</span><span class="doc-status"><span class="pend">Out for signature</span></span></div>
+        <div class="doc-foot"><span class="chip" aria-hidden="true"></span>Approved by you at 2:35pm. Nothing moved before that.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ Ticker ============ -->
+<div class="ticker rv">
+  <div class="wrap">
+    <span class="ticker-label">Two minutes, email to inbox</span>
+    <div class="ticker-steps tnum">
+      <span><b>2:29pm</b> email Papel</span>
+      <span><b>2:31pm</b> paperwork comes back</span>
+      <span><b>2:35pm</b> approved by you</span>
+      <span><b>2:36pm</b> out for signatures</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ How it works ============ -->
+<section class="section" id="how">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">How it works</span>
+      <h2 class="h-display">One email. Four timestamps.</h2>
+      <p class="body-lg">No software to learn, no portal, no fields to fill. The whole workflow is the email you already send your TC.</p>
+    </div>
+    <div class="timeline">
+      <div class="step rv">
+        <time>2:29pm</time>
+        <h3>Email Papel</h3>
+        <p>Send the terms the way you'd send them to your TC. Address, price, dates, contingencies. Plain sentences are enough.</p>
+      </div>
+      <div class="step rv">
+        <time>2:30pm</time>
+        <h3>Papel prepares</h3>
+        <p>The PA-1, disclosures, and addenda assembled from your terms. Anything unclear gets flagged and asked about, not guessed.</p>
+      </div>
+      <div class="step rv">
+        <time>2:31pm</time>
+        <h3>In your inbox</h3>
+        <p>Two minutes after you hit send, the paperwork is waiting, ready for your review.</p>
+      </div>
+      <div class="step rv">
+        <time>2:35pm</time>
+        <h3>You approve, it moves</h3>
+        <p>Nothing reaches your client until you sign off. Approve, and Papel routes signatures and watches every deadline through closing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Bento: what comes back ============ -->
+<section class="section" id="back" style="border-top:1px solid var(--ink-12);">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Paperwork</span>
+      <h2 class="h-display">Every document, every deadline, every signature.</h2>
+      <p class="body-lg">Papel is modeled on the best transaction coordinators. Built for speed and accuracy, it handles the full file from purchase agreement to closing.</p>
+    </div>
+    <div class="bento">
+      <div class="bcard rv">
+        <div class="bshape" aria-hidden="true">
+          <i style="background:var(--blueprint);"></i><i style="background:var(--clearsky);border-radius:0 100% 0 0;"></i><i style="background:var(--shoreline);border-radius:0 999px 999px 0;"></i>
+        </div>
+        <h3>Purchase agreements</h3>
+        <p>The PA-1 prepared from your terms, with the price, dates, and contingencies where they belong.</p>
+      </div>
+      <div class="bcard rv">
+        <div class="bshape" aria-hidden="true">
+          <i style="background:var(--goldrun);border-radius:100% 0 0 0;"></i><i style="background:var(--clearsky);"></i>
+        </div>
+        <h3>Disclosures</h3>
+        <p>Seller's disclosures assembled, filled from the record, and routed to the right signers.</p>
+      </div>
+      <div class="bcard rv">
+        <div class="bshape" aria-hidden="true">
+          <i style="background:var(--redline);border-radius:0 0 999px 999px;"></i><i style="background:var(--blueprint);border-radius:0 0 100% 0;"></i>
+        </div>
+        <h3>Addenda and counters</h3>
+        <p>FHA, inspection, radon, counter-offers. Prepared from an email, at your direction, when the deal shifts.</p>
+      </div>
+      <div class="bcard rv">
+        <div class="bshape" aria-hidden="true">
+          <i style="background:var(--shoreline);"></i><i style="background:var(--goldrun);border-radius:999px 0 0 999px;"></i>
+        </div>
+        <h3>Deadline tracking</h3>
+        <p>Inspection, financing, and closing dates watched through the whole deal. Reminders arrive with the date in the subject line.</p>
+      </div>
+      <div class="bcard rv">
+        <div class="bshape" aria-hidden="true">
+          <i style="background:var(--fieldwork);border-radius:0 100% 0 0;"></i><i style="background:var(--clearsky);"></i>
+        </div>
+        <h3>Signature routing</h3>
+        <p>Documents go out for e-signature in the right order, to the right people. You see who signed and who hasn't.</p>
+      </div>
+      <div class="bcard rv">
+        <div class="bshape" aria-hidden="true">
+          <i style="background:var(--blueprint);border-radius:0 999px 999px 0;"></i><i style="background:var(--redline);border-radius:0 0 0 100%;"></i>
+        </div>
+        <h3>Status updates</h3>
+        <p>Here's where we are: one summary per deal, every Friday by 8am. No logging in to find out.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Dark: the review ============ -->
+<section class="section dark on-dark" id="review">
+  <div class="wrap review-grid">
+    <div class="sec-head rv">
+      <span class="eyebrow">Review</span>
+      <h2 class="h-display">Your review, before anything moves.</h2>
+      <p class="body-lg">Papel prepares the file, flags what it doesn't know, and waits for your sign-off. The same handoff you'd have with a TC, without the hours in between.</p>
+      <p class="review-quote">Paperwork is handled.<br><em>Judgment stays with you.</em></p>
+    </div>
+    <div class="receipts rv">
+      <div class="receipt"><span class="r-stat">100%</span><span class="r-note">of documents pause for your approval. Every document, every deal.</span></div>
+      <div class="receipt"><span class="r-stat">99.9%</span><span class="r-note">field-level accuracy gate before launch. Honest number, measured field by field.</span></div>
+      <div class="receipt"><span class="r-stat">1,855</span><span class="r-note">automated tests run on every change to how Papel prepares documents.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Minnesota ============ -->
+<section class="section" id="minnesota">
+  <div class="wrap mn-grid">
+    <div class="sec-head rv">
+      <span class="eyebrow">Built for Minnesota</span>
+      <h2 class="h-display">The forms, known cold.</h2>
+      <p class="body-lg">The PA-1, MNAR addenda, earnest money rules, inspection contingencies. Minnesota's standardized forms are revised every August 1st, and the old versions retire with them. Papel works the current forms, not a national template with the state name swapped in.</p>
+    </div>
+    <div class="form-chips rv">
+      <span class="form-chip"><i style="background:var(--blueprint);"></i>Purchase agreement (PA-1)</span>
+      <span class="form-chip"><i style="background:var(--shoreline);border-radius:100% 0 0 0;"></i>MNAR addenda</span>
+      <span class="form-chip"><i style="background:var(--goldrun);border-radius:0 999px 999px 0;"></i>Earnest money</span>
+      <span class="form-chip"><i style="background:var(--redline);border-radius:0 0 100% 0;"></i>Inspection contingency</span>
+      <span class="form-chip"><i style="background:var(--fieldwork);"></i>Counter-offers</span>
+      <span class="form-chip"><i style="background:var(--clearsky);border-radius:999px 0 0 999px;"></i>Seller's disclosure</span>
+      <span class="form-chip"><i style="background:var(--blueprint);border-radius:0 0 0 100%;"></i>Closing disclosure</span>
+      <span class="form-chip"><i style="background:var(--goldrun);"></i>Financing addenda</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Pricing ============ -->
+<section class="section pricing" id="pricing">
+  <div class="wrap price-grid">
+    <div class="sec-head rv">
+      <span class="eyebrow">Pricing</span>
+      <div class="price-num tnum">$300<small>per deal</small></div>
+      <p class="body-lg">No subscription. No per-seat licenses. A deal goes under contract, Papel handles the paperwork through closing, and you pay only when it closes.</p>
+      <div style="margin-top:30px;">
+        <a class="btn btn-primary js-waitlist" href="#">Set up your brokerage <span class="chev">&rsaquo;</span></a>
+      </div>
+    </div>
+    <ul class="include rv">
+      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Paperwork in minutes.</b> Purchase agreements, disclosures, addenda, counters.</span></li>
+      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Your approval on every document.</b> Nothing moves until you sign off.</span></li>
+      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Deadline tracking through closing.</b> Inspection, financing, closing dates watched.</span></li>
+      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Signature routing.</b> Right order, right people, visible status.</span></li>
+      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Status updates.</b> One summary per deal, every Friday by 8am.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ Final CTA ============ -->
+<section class="final on-dark">
+  <div class="final-frag frag-tl" aria-hidden="true">
+    <i style="background:var(--blueprint);"></i><i style="background:var(--shoreline);border-radius:0 100% 0 0;"></i>
+  </div>
+  <div class="final-frag frag-br" aria-hidden="true">
+    <i style="background:var(--goldrun);border-radius:0 0 0 100%;"></i><i style="background:var(--redline);"></i>
+  </div>
+  <div class="wrap">
+    <h2 class="rv">Ready when you are.</h2>
+    <p class="body-lg rv">Email Papel on your next transaction, just like a TC. Everything comes back handled.</p>
+    <div class="rv"><a class="btn btn-paper js-waitlist" href="#">Set up your brokerage <span class="chev">&rsaquo;</span></a></div>
+  </div>
+</section>
+
+<!-- ============ Footer ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" aria-label="Papel home" style="display:inline-block;">
+          <svg width="240" height="65" viewBox="0 0 502 136" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M167.688 16.9473H129.065V105.087H145.938V78.4122H167.688C188.719 78.4122 197.674 63.2267 197.674 47.6396C197.674 32.0524 188.719 16.9473 167.688 16.9473ZM166.808 63.066H145.938V32.0524H167.288C176.964 32.0524 180.802 40.1673 180.802 47.6396C180.802 55.1118 176.804 63.066 166.808 63.066Z" fill="black"/>
+            <path d="M250.929 40.0649V49.1441C246.691 42.3146 238.055 38.458 229.259 38.458C210.947 38.458 197.673 52.9203 197.673 72.5248C197.673 88.5941 206.469 100.807 218.863 105.065C221.982 106.19 225.26 106.752 228.779 106.752C232.057 106.752 235.256 106.19 238.215 105.065C243.572 103.137 248.21 99.5212 250.929 94.8611V105.065H267.002V40.0649H250.929ZM232.137 91.7276C221.582 91.7276 213.746 82.9699 213.746 72.5248C213.746 62.0798 221.582 53.4828 231.977 53.4828C241.573 53.4828 250.689 61.3567 250.689 72.5248C250.689 83.693 242.133 91.7276 232.137 91.7276Z" fill="black"/>
+            <path d="M312.266 38.458C304.509 38.458 295.233 41.7522 290.755 48.7423V40.0649H274.763V131.338H290.755V96.468C293.474 100.646 297.712 103.458 302.51 105.065C305.709 106.19 309.067 106.752 312.346 106.752C315.864 106.752 319.303 106.19 322.501 105.065C334.816 100.887 344.091 89.0762 344.091 72.6052C344.091 51.7955 329.298 38.458 312.266 38.458ZM309.787 91.7276C300.431 91.7276 290.995 84.1751 290.995 72.6052C290.995 61.0353 299.951 53.4828 309.787 53.4828C319.622 53.4828 328.019 61.9191 328.019 72.6052C328.019 83.2912 319.702 91.7276 309.787 91.7276Z" fill="black"/>
+            <path d="M414.94 71.9624C414.94 51.6348 400.386 38.458 381.994 38.458C363.603 38.458 348.01 51.7955 348.01 72.5248C348.01 88.6744 357.366 100.887 370.959 105.065C374.398 106.19 378.156 106.752 381.994 106.752C385.833 106.752 389.591 106.19 393.109 105.065C400.546 102.896 407.103 98.3964 411.181 91.9686L400.386 83.7733C396.628 89.0762 389.831 92.1293 382.954 92.1293C373.278 92.1293 366.322 87.2282 364.482 78.2294H414.62C414.78 75.819 414.94 73.73 414.94 71.9624ZM364.482 66.9006C366.481 57.0984 373.518 52.7597 382.074 52.7597C391.11 52.7597 397.987 58.0625 399.027 66.9006H364.482Z" fill="black"/>
+            <path d="M447.398 90.0624C438.762 90.0624 436.283 83.233 436.443 75.4394V16.9473H420.369V75.7608C420.369 93.8387 428.446 105.087 446.438 105.087H452.116V90.0624H447.398Z" fill="black"/>
+            <path d="M34.4657 30.0498V75.1241H22.3907C9.99586 75.1241 0 65.0005 0 52.5468C0 40.0931 9.99586 30.0498 22.3907 30.0498H34.4657Z" fill="#3A97F0"/>
+            <path d="M0.797852 75.1299L34.4639 105.179V135.229L0.877818 105.26L0.797852 105.179V75.1299Z" fill="#33B599"/>
+            <path d="M98.034 52.5465C98.034 81.5515 74.6046 105.173 45.7376 105.173H34.4627V75.1238H45.7376C58.132 75.1238 68.1275 65.0002 68.1275 52.5465C68.1275 40.0928 58.132 30.0495 45.7376 30.0495H34.4627L0.797852 0H45.7376C74.6046 0 98.034 23.5415 98.034 52.5465Z" fill="#1F80FF"/>
+            <path d="M467.774 88.8171V85.9033H480.5V88.8171H475.779V102.855H472.454V88.8171H467.774ZM501.916 102.857H498.426L497.195 92.1836L492.967 100.968H490.381L486.112 92.2252L484.839 102.857H481.391L483.526 85.9033H486.317L491.695 97.1925L496.95 85.9033H499.824L501.918 102.857H501.916Z" fill="black"/>
+          </svg>
+        </a>
+        <p>An instant transaction coordinator for residential real estate. Documents prepared in minutes, ready for your review.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="#how">How it works</a>
+        <a href="#back">Paperwork</a>
+        <a href="#review">Review</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">For brokers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <a href="#">Minnesota form changes</a>
+        <a href="#">Deadline rules</a>
+        <a href="#">Compliance explainers</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>&copy; 2026 Papel. All rights reserved.</span>
+      <span>Made in Minnesota.</span>
+    </div>
+  </div>
+</footer>
+
+
+<div class="wl-overlay" id="wlOverlay" hidden>
+  <div class="wl-modal" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+    <button class="wl-close" aria-label="Close">&times;</button>
+    <div class="wl-chips" aria-hidden="true"><i></i><i></i><i></i></div>
+    <h3 id="wlTitle">Papel launches soon.</h3>
+    <p class="wl-sub">Brokerage setup isn't live yet. Add your email and you'll be first in line when it is.</p>
+    <form class="wl-form" novalidate>
+      <input type="email" name="email" required placeholder="you@brokerage.com" aria-label="Email address" />
+      <button class="btn btn-primary" type="submit">Join the waitlist <span class="chev">&rsaquo;</span></button>
+    </form>
+    <p class="wl-done" hidden>Done. You're on the list.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- Supergraphic tile field (seeded, deterministic) ---- */
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  var rand = mulberry32(20260710);
+
+  var colors = [
+    ["#1F80FF",22],["#3A97F0",10],["#33B599",9],
+    ["#34A753",6],["#F9BB07",8],["#E94436",4],["#FAFAFA",41]
+  ];
+  var total = colors.reduce(function(s,c){return s+c[1];},0);
+  function pickColor(){
+    var r = rand()*total, acc=0;
+    for(var i=0;i<colors.length;i++){acc+=colors[i][1];if(r<acc)return colors[i][0];}
+    return colors[0][0];
+  }
+  var shapes = ["sq","sq","sq","sq","qt-tl","qt-tr","qt-br","qt-bl","dp-r","dp-l","dp-t","dp-b","ci","ci"];
+  function pickShape(){return shapes[Math.floor(rand()*shapes.length)];}
+
+  var tilesEl = document.getElementById("tiles");
+  var canvas = tilesEl.parentElement;
+  var tiles = [];
+  var gridCols = 0;
+  var settleTimer = null;
+  /* fresh layout every visit, stable across resizes within one */
+  var sessionSeed = (Math.random()*0x7fffffff)|0;
+
+  function buildTiles(){
+    clearTimeout(settleTimer);
+    tilesEl.classList.remove("on","settled");
+    tilesEl.innerHTML = "";
+    tiles = [];
+    rand = mulberry32(sessionSeed);
+    var size = 58;
+    var cols = Math.ceil(canvas.offsetWidth / size);
+    var rows = Math.ceil(canvas.offsetHeight / size);
+    var frag = document.createDocumentFragment();
+    var maxDelay = 0;
+    for(var r=0;r<rows;r++){
+      for(var c=0;c<cols;c++){
+        var d = document.createElement("i");
+        var color = pickColor();
+        d.className = "tile " + (color==="#FAFAFA" ? "sq blank" : pickShape());
+        d.style.background = color;
+        d.dataset.c = color;
+        /* diagonal stagger sweeping from top-left */
+        var delay = (r+c)*0.028 + rand()*0.12;
+        if(delay > maxDelay) maxDelay = delay;
+        d.style.setProperty("--d", delay.toFixed(3)+"s");
+        frag.appendChild(d);
+      }
+    }
+    gridCols = cols;
+    tilesEl.style.gridTemplateColumns = "repeat("+cols+",1fr)";
+    tilesEl.appendChild(frag);
+    if(reduced){
+      tilesEl.querySelectorAll(".tile").forEach(function(t){t.style.transform="none";});
+      return;
+    }
+    requestAnimationFrame(function(){requestAnimationFrame(function(){tilesEl.classList.add("on");});});
+    /* once the entry animation finishes, drop it so inline transforms can take over
+       (a filling CSS animation would otherwise override style.transform) */
+    settleTimer = setTimeout(function(){
+      tilesEl.classList.add("settled");
+      for(var i=0;i<tilesEl.children.length;i++){
+        tilesEl.children[i].style.animation = "none";
+      }
+      collectTiles();
+    }, maxDelay*1000 + 550);
+  }
+
+  function collectTiles(){
+    tiles = [];
+    for(var i=0;i<tilesEl.children.length;i++){
+      tiles.push({el:tilesEl.children[i]});
+    }
+  }
+
+  /* keep a hovered tile above its neighbors until its shrink-back finishes */
+  tilesEl.addEventListener("mouseover", function(e){
+    var el = e.target;
+    if(el.classList && el.classList.contains("tile") && !el.classList.contains("blank")){
+      clearTimeout(el._zt);
+      el.style.zIndex = 3;
+    }
+  });
+  tilesEl.addEventListener("mouseout", function(e){
+    var el = e.target;
+    if(el.classList && el.classList.contains("tile")){
+      el.style.transform = "";
+      el._zt = setTimeout(function(){ el.style.zIndex = ""; }, 300);
+    }
+  });
+
+  /* the corner under the cursor tilts toward it, like paper responding to touch */
+  tilesEl.addEventListener("mousemove", function(e){
+    var el = e.target;
+    if(reduced || !tilesEl.classList.contains("settled")) return;
+    if(!el.classList || !el.classList.contains("tile") || el.classList.contains("blank")) return;
+    var tr = tilesEl.getBoundingClientRect();
+    var px = (e.clientX - tr.left - el.offsetLeft) / el.offsetWidth - 0.5;
+    var py = (e.clientY - tr.top - el.offsetTop) / el.offsetHeight - 0.5;
+    el.style.transform = "perspective(260px) scale(1.08)" +
+      " rotateX(" + (-py*30).toFixed(1) + "deg)" +
+      " rotateY(" + (px*30).toFixed(1) + "deg)";
+  }, {passive:true});
+
+  /* clicking a shape changes it: new color, new shape, or both */
+  tilesEl.addEventListener("click", function(e){
+    var el = e.target;
+    if(!el.classList || !el.classList.contains("tile") || el.classList.contains("blank")) return;
+    var r = Math.random();
+    if(r < 0.65){
+      var c = el.dataset.c;
+      while(c === el.dataset.c){ c = liveColor(); }
+      el.style.background = c;
+      el.dataset.c = c;
+    }
+    if(r >= 0.35){
+      var cls = el.className;
+      while(cls === el.className){ cls = "tile " + shapes[Math.floor(Math.random()*shapes.length)]; }
+      el.className = cls;
+    }
+    /* your change commands the field: it ripples out in all four directions and sticks */
+    el.dataset.held = "1";
+    if(gridCols && tiles.length){
+      var idx = Array.prototype.indexOf.call(tilesEl.children, el);
+      if(idx >= 0){
+        /* ripple in a random set of directions: sometimes one clean line, sometimes a burst */
+        var dirs = [[0,1],[0,-1],[1,0],[-1,0]].sort(function(){return Math.random()-0.5;});
+        var count = 1 + Math.floor(Math.random()*4);
+        var shape = el.className.replace("tile ","");
+        for(var i=0;i<count;i++){
+          sweep(
+            Math.floor(idx/gridCols), idx%gridCols,
+            dirs[i][0], dirs[i][1],
+            el.dataset.c, shape,
+            2 + Math.floor(Math.random()*3), true, true
+          );
+        }
+      }
+    }
+  });
+
+  /* ---- Timed morph: colored tiles swap shape or color; the composition stays put ---- */
+  var liveColors = [
+    ["#1F80FF",30],["#3A97F0",14],["#33B599",13],
+    ["#34A753",8],["#F9BB07",10],["#E94436",5]
+  ];
+  var liveTotal = liveColors.reduce(function(s,c){return s+c[1];},0);
+  function liveColor(){
+    var r = Math.random()*liveTotal, acc = 0;
+    for(var i=0;i<liveColors.length;i++){acc+=liveColors[i][1];if(r<acc)return liveColors[i][0];}
+    return liveColors[0][0];
+  }
+  /* a change sweeping through touching tiles: the whole line shifts to one color and one shape */
+  function sweep(r0, c0, dr, dc, color, shape, len, skipFirst, byUser){
+    var rows = Math.ceil(tiles.length/gridCols);
+    for(var k = skipFirst ? 1 : 0; k < len; k++){
+      var r = r0 + dr*k, c = c0 + dc*k;
+      if(r < 0 || c < 0 || r >= rows || c >= gridCols) break;
+      var t = tiles[r*gridCols + c];
+      if(!t || t.el.classList.contains("blank")) continue;
+      if(!byUser && t.el.dataset.held) continue; /* ambient motion never overrides the user */
+      (function(el, delay){
+        setTimeout(function(){
+          el.style.background = color;
+          el.dataset.c = color;
+          el.className = "tile " + shape;
+          if(byUser) el.dataset.held = "1";
+        }, delay);
+      })(t.el, k*60);
+    }
+  }
+  function lineRun(){
+    var rows = Math.ceil(tiles.length/gridCols);
+    var horiz = Math.random() < 0.5;
+    sweep(
+      Math.floor(Math.random()*rows), Math.floor(Math.random()*gridCols),
+      horiz ? 0 : 1, horiz ? 1 : 0,
+      liveColor(), shapes[Math.floor(Math.random()*shapes.length)],
+      3 + Math.floor(Math.random()*4), false, false
+    );
+  }
+
+  /* while the cursor is on the field, the ambient shuffle waits for the user */
+  var lastTouch = 0;
+  tilesEl.addEventListener("mousemove", function(){ lastTouch = Date.now(); }, {passive:true});
+
+  function morphBeat(){
+    var userPresent = Date.now() - lastTouch < 1600;
+    if(!reduced && tiles.length && !document.hidden && !userPresent){
+      if(gridCols && Math.random() < 0.25){
+        lineRun();
+      } else {
+        var burst = 2 + Math.floor(Math.random()*4);
+        for(var n=0;n<burst;n++){
+          var t = tiles[Math.floor(Math.random()*tiles.length)];
+          if(!t || t.el.classList.contains("blank") || t.el.dataset.held) continue;
+          var el = t.el;
+          if(Math.random() < 0.45){
+            var c = liveColor();
+            el.style.background = c;
+            el.dataset.c = c;
+          } else {
+            el.className = "tile " + shapes[Math.floor(Math.random()*shapes.length)];
+          }
+        }
+      }
+    }
+    /* irregular rhythm: the next beat lands anywhere from 90ms to 380ms out */
+    setTimeout(morphBeat, 90 + Math.random()*290);
+  }
+  setTimeout(morphBeat, 900);
+
+  buildTiles();
+  var rT;
+  window.addEventListener("resize",function(){clearTimeout(rT);rT=setTimeout(buildTiles,220);});
+
+  /* ---- Scroll reveals ---- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}
+    });
+  },{threshold:.12,rootMargin:"0px 0px -40px 0px"});
+  document.querySelectorAll(".rv").forEach(function(el,i){
+    el.style.transitionDelay = (i%4)*0.06+"s";
+    io.observe(el);
+  });
+})();
+
+(function(){
+  var overlay = document.getElementById("wlOverlay");
+  if(!overlay) return;
+  var input = overlay.querySelector("input");
+  var form = overlay.querySelector(".wl-form");
+  var done = overlay.querySelector(".wl-done");
+  var lastFocus = null;
+  function openModal(e){
+    if(e) e.preventDefault();
+    lastFocus = document.activeElement;
+    var saved = null;
+    try{ saved = localStorage.getItem("papel-waitlist"); }catch(err){}
+    if(saved) input.value = saved;
+    form.hidden = false;
+    done.hidden = true;
+    overlay.hidden = false;
+    requestAnimationFrame(function(){ overlay.classList.add("on"); });
+    setTimeout(function(){ input.focus(); input.select(); }, 140);
+  }
+  function closeModal(){
+    overlay.classList.remove("on");
+    setTimeout(function(){ overlay.hidden = true; }, 220);
+    if(lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.querySelectorAll(".js-waitlist").forEach(function(a){
+    a.addEventListener("click", openModal);
+  });
+  overlay.querySelector(".wl-close").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if(e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && !overlay.hidden) closeModal();
+  });
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(!input.value || input.value.indexOf("@") < 1){ input.focus(); return; }
+    try{ localStorage.setItem("papel-waitlist", input.value); }catch(err){}
+    form.hidden = true;
+    done.textContent = "Done. " + input.value + " is on the list.";
+    done.hidden = false;
+  });
+})();
+</script>
+</body>
+</html>
