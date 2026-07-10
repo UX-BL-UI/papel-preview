@@ -719,12 +719,12 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
         <a class="btn btn-primary js-waitlist" href="#">Set up your brokerage <span class="chev">&rsaquo;</span></a>
       </div>
     </div>
-    <ul class="include rv">
-      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Paperwork in minutes.</b> Purchase agreements, disclosures, addenda, counters.</span></li>
-      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Your approval on every document.</b> Nothing moves until you sign off.</span></li>
-      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Deadline tracking through closing.</b> Inspection, financing, closing dates watched.</span></li>
-      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Signature routing.</b> Right order, right people, visible status.</span></li>
-      <li><span class="tick" aria-hidden="true">&#10003;</span><span><b>Status updates.</b> One summary per deal, every Friday by 8am.</span></li>
+    <ul class="include">
+      <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Paperwork in minutes.</b> Purchase agreements, disclosures, addenda, counters.</span></li>
+      <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Your approval on every document.</b> Nothing moves until you sign off.</span></li>
+      <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Deadline tracking through closing.</b> Inspection, financing, closing dates watched.</span></li>
+      <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Signature routing.</b> Right order, right people, visible status.</span></li>
+      <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Status updates.</b> One summary per deal, every Friday by 8am.</span></li>
     </ul>
   </div>
 </section>
@@ -1044,7 +1044,7 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
     });
   },{threshold:.12,rootMargin:"0px 0px -40px 0px"});
   document.querySelectorAll(".rv").forEach(function(el,i){
-    el.style.transitionDelay = (i%4)*0.06+"s";
+    el.style.transitionDelay = (i%6)*0.07+"s";
     io.observe(el);
   });
 })();
