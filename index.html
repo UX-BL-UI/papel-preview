@@ -398,18 +398,29 @@ body{position:relative;}
   content:"";position:absolute;inset:0;border-radius:inherit;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
   background-size:120px 120px;
-  opacity:.6;pointer-events:none;
+  opacity:.6;pointer-events:none;z-index:2;
 }
-.polaroid:nth-child(1){--tilt:-2.4deg;margin-top:16px;}
-.polaroid:nth-child(2){--tilt:1.6deg;}
-.polaroid:nth-child(3){--tilt:-1.2deg;margin-top:26px;}
-.polaroid:nth-child(4){--tilt:2.2deg;margin-top:4px;}
-.polaroid:nth-child(5){--tilt:-1.8deg;margin-top:18px;}
+.polaroid::before{ /* uneven aging: faint warm shading, different corner per print */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+  background:radial-gradient(130% 110% at var(--age,80% 110%),rgba(146,126,94,var(--age-a,.07)),rgba(146,126,94,0) 58%);
+}
+.polaroid:nth-child(1){--tilt:-2.4deg;margin-top:16px;scale:.985;--age:82% 112%;--age-a:.08;background:#FBFAF7;}
+.polaroid:nth-child(2){--tilt:1.6deg;scale:1.012;--age:8% 106%;--age-a:.05;background:#FCFCFB;}
+.polaroid:nth-child(3){--tilt:-1.2deg;margin-top:26px;scale:.995;--age:90% -6%;--age-a:.06;background:#FCFBF9;}
+.polaroid:nth-child(4){--tilt:2.2deg;margin-top:4px;scale:1.005;--age:14% 116%;--age-a:.09;background:#FAF9F6;}
+.polaroid:nth-child(5){--tilt:-1.8deg;margin-top:18px;scale:.978;--age:70% 108%;--age-a:.06;background:#FCFCFA;}
+.polaroid:nth-child(odd){border-color:rgba(20,20,20,.17) rgba(20,20,20,.11) rgba(20,20,20,.19) rgba(20,20,20,.12);}
+.polaroid:nth-child(even){border-color:rgba(20,20,20,.12) rgba(20,20,20,.16) rgba(20,20,20,.18) rgba(20,20,20,.10);}
+.polaroid:nth-child(1) .photo{background:linear-gradient(158deg,#E4E1DA,#D4D1CA);}
+.polaroid:nth-child(2) .photo{background:linear-gradient(166deg,#E1E0DD,#D2D1CE);}
+.polaroid:nth-child(3) .photo{background:linear-gradient(150deg,#E3E1DE,#D1CFCB);}
+.polaroid:nth-child(4) .photo{background:linear-gradient(170deg,#E2DFD8,#D5D2C9);}
+.polaroid:nth-child(5) .photo{background:linear-gradient(155deg,#E0DEDA,#D0CEC9);}
 .polaroid .photo{
   display:block;width:100%;aspect-ratio:201/202;
   background:linear-gradient(160deg,#E2E0DC,#D3D1CC);
   border-radius:1px;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.16),inset 0 1px 4px rgba(0,0,0,.24);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.16),inset 0 1px 4px rgba(0,0,0,.24),0 2px 3px -2px rgba(0,0,0,.28); /* pod shading below window */
   filter:saturate(.12) brightness(1.45) contrast(.82); /* undeveloped print */
   transition:filter 1.9s ease .3s;
 }
