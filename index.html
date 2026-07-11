@@ -850,9 +850,9 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
 <section class="section moments" id="moments">
   <div class="wrap">
     <div class="sec-head rv">
-      <span class="eyebrow">People, not paperwork</span>
-      <h2 class="h-display">The part you keep.</h2>
-      <p class="body-lg">Sold signs, first keys, champagne on the front steps. Getting to a deal is a marathon; the paperwork after is a sprint you shouldn't have to run. Papel runs it so these moments stay yours.</p>
+      <span class="eyebrow">People over paperwork</span>
+      <h2 class="h-display">What matters most.</h2>
+      <p class="body-lg">Sold signs, first keys, champagne on the front steps. Papel handles the paperwork so you can focus on building relationships, closing deals, and finding more clients.</p>
     </div>
     <div class="shoebox">
       <figure class="polaroid rv"><span class="photo"><img src="photos/homebuyer-1.jpg" alt="New homeowners celebrating at their front door" loading="lazy" /></span></figure>
@@ -1251,6 +1251,17 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   document.querySelectorAll(".rv").forEach(function(el,i){
     el.style.transitionDelay = (i%6)*0.07+"s";
     io.observe(el);
+  });
+})();
+
+/* develop order: leftmost print first, the rest shuffled per load */
+(function(){
+  var shots = Array.prototype.slice.call(document.querySelectorAll(".shoebox .polaroid .photo"));
+  if(!shots.length) return;
+  var rest = shots.slice(1);
+  for(var i=rest.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=rest[i]; rest[i]=rest[j]; rest[j]=t; }
+  [shots[0]].concat(rest).forEach(function(ph,k){
+    ph.style.transitionDelay = (0.15 + k*0.55).toFixed(2) + "s";
   });
 })();
 
