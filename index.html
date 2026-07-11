@@ -421,15 +421,10 @@ body{position:relative;}
   background:linear-gradient(160deg,#E2E0DC,#D3D1CC);
   border-radius:1px;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.16),inset 0 1px 4px rgba(0,0,0,.24),0 2px 3px -2px rgba(0,0,0,.28); /* pod shading below window */
-  filter:saturate(.10) sepia(.45) brightness(.07) contrast(1.06); /* undeveloped print: near black */
+  filter:saturate(.15) brightness(.07) contrast(1.05); /* undeveloped print: near black */
+  transition:filter 4.5s ease .3s;
 }
-.polaroid.in .photo{animation:develop 5.5s ease both;} /* develops on reveal */
-@keyframes develop{ /* dark, then sepia-mono lingers, color arrives last */
-  0%{filter:saturate(.10) sepia(.45) brightness(.07) contrast(1.06);}
-  40%{filter:saturate(.22) sepia(.45) brightness(.82) contrast(1.03);}
-  72%{filter:saturate(.30) sepia(.38) brightness(.95) contrast(1.01);}
-  100%{filter:saturate(1) sepia(0) brightness(1) contrast(1);}
-}
+.polaroid.in .photo{filter:none;} /* develops on reveal */
 .polaroid .photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;}
 @media (max-width:1020px){
   .shoebox{flex-wrap:wrap;}
@@ -451,7 +446,7 @@ body{position:relative;}
   .shoebox .polaroid.rv.in{transform:none;}
 }
 @media (prefers-reduced-motion:reduce){
-  .polaroid .photo{filter:none;transition:none;animation:none;}
+  .polaroid .photo{filter:none;transition:none;}
 }
 
 /* ============ Pricing ============ */
@@ -1278,7 +1273,7 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   var rest = shots.slice(1);
   for(var i=rest.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=rest[i]; rest[i]=rest[j]; rest[j]=t; }
   [shots[0]].concat(rest).forEach(function(ph,k){
-    ph.style.animationDelay = (0.15 + k*0.55).toFixed(2) + "s";
+    ph.style.transitionDelay = (0.15 + k*0.55).toFixed(2) + "s";
   });
 })();
 
