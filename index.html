@@ -1200,13 +1200,22 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   }
   requestAnimationFrame(conveyor);
   /* live changes anywhere along the stream, plus a gentle pull toward order on the right */
+  /* ambient changes keep clear of the cursor so the splash never flickers */
+  function nearCursor(idx){
+    if(splash.x == null) return false;
+    var c = idx % gridCols, r2 = Math.floor(idx/gridCols);
+    var cx = -6*tileSize + (c+0.5)*tileSize + flowOffset;
+    var cy = bandTop + (r2+0.5)*tileSize;
+    var dx = cx - splash.x, dy = cy - splash.y;
+    return (dx*dx + dy*dy) < 160*160;
+  }
   setInterval(function(){
     if(reduced || !tiles.length || document.hidden) return;
     var burst = 2 + Math.floor(Math.random()*3);
     for(var n=0;n<burst;n++){
       var idx = Math.floor(Math.random()*tiles.length);
       var el = tiles[idx].el;
-      if(!el || el.classList.contains("blank") || el.dataset.held) continue;
+      if(!el || el.classList.contains("blank") || el.dataset.held || nearCursor(idx)) continue;
       if(Math.random() < 0.5){
         var c = liveColor();
         el.style.background = c;
@@ -1217,7 +1226,7 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
     }
     var idx2 = Math.floor(Math.random()*tiles.length);
     var el2 = tiles[idx2].el;
-    if(el2 && !el2.classList.contains("blank") && !el2.dataset.held &&
+    if(el2 && !el2.classList.contains("blank") && !el2.dataset.held && !nearCursor(idx2) &&
        (idx2 % gridCols)/gridCols > 0.55 + Math.random()*0.4){
       el2.className = "tile sq";
       el2.style.background = "#1F80FF";
