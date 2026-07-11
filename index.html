@@ -441,6 +441,9 @@ body{position:relative;}
   .shoebox .polaroid{width:min(62vw,230px);scroll-snap-align:center;}
   .shoebox .polaroid:nth-child(n){margin-top:8px;margin-left:0;}
   .shoebox .polaroid:nth-child(2n){margin-top:0;}
+  /* swipe direction: prints arrive from the right */
+  .shoebox .polaroid.rv{transform:translateX(44px);}
+  .shoebox .polaroid.rv.in{transform:none;}
 }
 @media (prefers-reduced-motion:reduce){
   .polaroid .photo{filter:none;transition:none;}
