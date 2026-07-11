@@ -378,7 +378,7 @@ body{position:relative;}
 .shoebox{
   position:relative;z-index:56; /* layout rails sit at z-55 */
   display:flex;align-items:flex-start;justify-content:center;
-  gap:clamp(18px,2.6vw,34px);
+  gap:clamp(10px,1.2vw,16px);
   padding-top:18px;
 }
 .polaroid{
@@ -404,11 +404,11 @@ body{position:relative;}
   content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
   background:radial-gradient(130% 110% at var(--age,80% 110%),rgba(146,126,94,var(--age-a,.07)),rgba(146,126,94,0) 58%);
 }
-.polaroid:nth-child(1){--tilt:-2.4deg;margin-top:16px;scale:.985;--age:82% 112%;--age-a:.08;background:#FBFAF7;}
-.polaroid:nth-child(2){--tilt:1.6deg;scale:1.012;--age:8% 106%;--age-a:.05;background:#FCFCFB;}
-.polaroid:nth-child(3){--tilt:-1.2deg;margin-top:26px;scale:.995;--age:90% -6%;--age-a:.06;background:#FCFBF9;}
-.polaroid:nth-child(4){--tilt:2.2deg;margin-top:4px;scale:1.005;--age:14% 116%;--age-a:.09;background:#FAF9F6;}
-.polaroid:nth-child(5){--tilt:-1.8deg;margin-top:18px;scale:.978;--age:70% 108%;--age-a:.06;background:#FCFCFA;}
+.polaroid:nth-child(1){--tilt:-2.4deg;margin-top:22px;scale:.985;--age:82% 112%;--age-a:.08;background:#FBFAF7;}
+.polaroid:nth-child(2){--tilt:1.6deg;margin-left:-4px;scale:1.012;--age:8% 106%;--age-a:.05;background:#FCFCFB;}
+.polaroid:nth-child(3){--tilt:-1.2deg;margin-top:30px;margin-left:40px;scale:.995;--age:90% -6%;--age-a:.06;background:#FCFBF9;}
+.polaroid:nth-child(4){--tilt:2.2deg;margin-top:8px;margin-left:6px;scale:1.005;--age:14% 116%;--age-a:.09;background:#FAF9F6;}
+.polaroid:nth-child(5){--tilt:-1.8deg;margin-top:14px;margin-left:50px;scale:.978;--age:70% 108%;--age-a:.06;background:#FCFCFA;}
 .polaroid:nth-child(odd){border-color:rgba(20,20,20,.17) rgba(20,20,20,.11) rgba(20,20,20,.19) rgba(20,20,20,.12);}
 .polaroid:nth-child(even){border-color:rgba(20,20,20,.12) rgba(20,20,20,.16) rgba(20,20,20,.18) rgba(20,20,20,.10);}
 .polaroid:nth-child(1) .photo{background:linear-gradient(158deg,#E4E1DA,#D4D1CA);}
@@ -439,7 +439,7 @@ body{position:relative;}
   }
   .shoebox::-webkit-scrollbar{display:none;}
   .shoebox .polaroid{width:min(62vw,230px);scroll-snap-align:center;}
-  .shoebox .polaroid:nth-child(n){margin-top:8px;}
+  .shoebox .polaroid:nth-child(n){margin-top:8px;margin-left:0;}
   .shoebox .polaroid:nth-child(2n){margin-top:0;}
 }
 @media (prefers-reduced-motion:reduce){
