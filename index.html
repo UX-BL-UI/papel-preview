@@ -374,6 +374,7 @@ body{position:relative;}
 
 /* ============ Moments (polaroids) ============ */
 .moments{border-top:1px solid var(--ink-12);overflow:hidden;}
+.moments .sec-head{margin-bottom:clamp(8px,1.5vw,18px);}
 .shoebox{
   position:relative;z-index:56; /* layout rails sit at z-55 */
   display:flex;align-items:flex-start;justify-content:center;
@@ -413,6 +414,7 @@ body{position:relative;}
   transition:filter 1.9s ease .3s;
 }
 .polaroid.in .photo{filter:none;} /* develops on reveal */
+.polaroid .photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;}
 @media (max-width:1020px){
   .shoebox{flex-wrap:wrap;}
 }
@@ -812,24 +814,6 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
   </div>
 </section>
 
-<!-- ============ Moments (polaroids) ============ -->
-<section class="section moments" id="moments">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <span class="eyebrow">People, not paperwork</span>
-      <h2 class="h-display">The part you keep.</h2>
-      <p class="body-lg">Sold signs, first keys, champagne on the front steps. Getting to a deal is a marathon; the paperwork after is a sprint you shouldn't have to run. Papel runs it so these moments stay yours.</p>
-    </div>
-    <div class="shoebox">
-      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
-      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
-      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
-      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
-      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
-    </div>
-  </div>
-</section>
-
 <!-- ============ Pricing ============ -->
 <section class="section pricing" id="pricing">
   <div class="wrap price-grid">
@@ -848,6 +832,24 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
       <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Signature routing.</b> Right order, right people, visible status.</span></li>
       <li class="rv"><span class="tick" aria-hidden="true">&#10003;</span><span><b>Status updates.</b> One summary email delivered when you want it.</span></li>
     </ul>
+  </div>
+</section>
+
+<!-- ============ Moments (polaroids) ============ -->
+<section class="section moments" id="moments">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">People, not paperwork</span>
+      <h2 class="h-display">The part you keep.</h2>
+      <p class="body-lg">Sold signs, first keys, champagne on the front steps. Getting to a deal is a marathon; the paperwork after is a sprint you shouldn't have to run. Papel runs it so these moments stay yours.</p>
+    </div>
+    <div class="shoebox">
+      <figure class="polaroid rv"><span class="photo"><img src="photos/homebuyer-1.jpg" alt="New homeowners celebrating at their front door" loading="lazy" /></span></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span></figure>
+    </div>
   </div>
 </section>
 
