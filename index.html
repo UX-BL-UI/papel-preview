@@ -372,6 +372,75 @@ body{position:relative;}
 }
 .form-chip i{width:9px;height:9px;flex:none;display:block;}
 
+/* ============ Moments (polaroids) ============ */
+.moments{border-top:1px solid var(--ink-12);overflow:hidden;}
+.shoebox{
+  display:flex;align-items:flex-start;justify-content:center;
+  gap:clamp(18px,2.6vw,34px);
+  padding-top:18px;
+}
+.polaroid{
+  flex:0 0 auto;
+  width:clamp(170px,16vw,216px);
+  aspect-ratio:226/276;
+  margin:0;
+  background:#fff;
+  border:1px solid var(--ink-08);
+  border-radius:8px;
+  box-shadow:0 3px 16px rgba(20,20,20,.09),0 14px 34px rgba(20,20,20,.07);
+  padding:12px 12px 0; /* pct padding on flex items resolves vs container */
+  rotate:var(--tilt,0deg);
+  transition:opacity .7s var(--ease-out),transform .7s var(--ease-out),
+    rotate .35s var(--ease-out),translate .35s var(--ease-out),
+    box-shadow .35s var(--ease-out);
+}
+.polaroid:nth-child(1){--tilt:-2.4deg;margin-top:16px;}
+.polaroid:nth-child(2){--tilt:1.6deg;}
+.polaroid:nth-child(3){--tilt:-1.2deg;margin-top:26px;}
+.polaroid:nth-child(4){--tilt:2.2deg;margin-top:4px;}
+.polaroid:nth-child(5){--tilt:-1.8deg;margin-top:18px;}
+@media (hover:hover){
+  .polaroid:hover{
+    rotate:0deg;translate:0 -8px;
+    box-shadow:0 8px 22px rgba(20,20,20,.13),0 26px 52px rgba(20,20,20,.12);
+  }
+}
+.polaroid .photo{
+  display:block;width:100%;aspect-ratio:201/202;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E"),
+    linear-gradient(160deg,#E9E7E4,#DBD9D5);
+  background-size:120px 120px,cover;
+  border-radius:2px;
+  box-shadow:inset 0 0 6px rgba(0,0,0,.22);
+  filter:saturate(.12) brightness(1.45) contrast(.82); /* undeveloped print */
+  transition:filter 1.9s ease .3s;
+}
+.polaroid.in .photo{filter:none;} /* develops on reveal */
+.polaroid figcaption{
+  padding-top:10px;text-align:center;
+  font-size:13px;color:var(--ink-55);letter-spacing:.01em;
+}
+@media (max-width:1020px){
+  .shoebox{flex-wrap:wrap;}
+}
+@media (max-width:680px){
+  .shoebox{
+    flex-wrap:nowrap;justify-content:flex-start;
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    margin-inline:calc(-1 * var(--margin));
+    padding:18px var(--margin) 28px;
+    scrollbar-width:none;
+  }
+  .shoebox::-webkit-scrollbar{display:none;}
+  .shoebox .polaroid{width:min(62vw,230px);scroll-snap-align:center;}
+  .shoebox .polaroid:nth-child(n){margin-top:8px;}
+  .shoebox .polaroid:nth-child(2n){margin-top:0;}
+}
+@media (prefers-reduced-motion:reduce){
+  .polaroid .photo{filter:none;transition:none;}
+}
+
 /* ============ Pricing ============ */
 .pricing{border-top:1px solid var(--ink-12);}
 .price-grid{
@@ -747,6 +816,24 @@ footer{border-top:1px solid var(--ink-12);padding-block:56px 40px;}
       <span class="form-chip"><i style="background:var(--clearsky);border-radius:999px 0 0 999px;"></i>Seller's disclosure</span>
       <span class="form-chip"><i style="background:var(--blueprint);border-radius:0 0 0 100%;"></i>Closing disclosure</span>
       <span class="form-chip"><i style="background:var(--goldrun);"></i>Financing addenda</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Moments (polaroids) ============ -->
+<section class="section moments" id="moments">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">People, not paperwork</span>
+      <h2 class="h-display">The part you keep.</h2>
+      <p class="body-lg">Sold signs, first keys, champagne on the front steps. Getting to a deal is a marathon; the paperwork after is a sprint you shouldn't have to run. Papel runs it so these moments stay yours.</p>
+    </div>
+    <div class="shoebox">
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span><figcaption>Sold. Maple Grove, March.</figcaption></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span><figcaption>First keys. Linden Hills.</figcaption></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span><figcaption>Closed in 21 days. Duluth.</figcaption></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span><figcaption>Offer accepted. Lake Nokomis.</figcaption></figure>
+      <figure class="polaroid rv"><span class="photo" role="img" aria-label="Photo placeholder"></span><figcaption>Day one. Edina.</figcaption></figure>
     </div>
   </div>
 </section>
